@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>세계 주요 도시 실시간 날씨</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 0 16px;
+    background: #0f172a;
+    color: #f1f5f9;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.5rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .card {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .card h2 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+  }
+  .temp {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  .desc {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+  .updated {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+<h1>세계 주요 도시 실시간 날씨</h1>
+<div class="grid" id="grid"></div>
+<div class="updated" id="updated"></div>
+
+<script>
+const cities = [
+  { name: "서울", lat: 37.5665, lon: 126.9780 },
+  { name: "뉴욕", lat: 40.7128, lon: -74.0060 },
+  { name: "런던", lat: 51.5074, lon: -0.1278 },
+  { name: "도쿄", lat: 35.6895, lon: 139.6917 },
+  { name: "파리", lat: 48.8566, lon: 2.3522 },
+];
+
+const weatherCodeMap = {
+  0: "맑음", 1: "대체로 맑음", 2: "부분 흐림", 3: "흐림",
+  45: "안개", 48: "짙은 안개",
+  51: "약한 이슬비", 53: "이슬비", 55: "강한 이슬비",
+  61: "약한 비", 63: "비", 65: "강한 비",
+  71: "약한 눈", 73: "눈", 75: "강한 눈",
+  80: "약한 소나기", 81: "소나기", 82: "강한 소나기",
+  95: "뇌우",
+};
+
+async function fetchWeather(city) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current_weather=true`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${city.name} 날씨를 불러오지 못했습니다.`);
+  const data = await res.json();
+  return data.current_weather;
+}
+
+function renderCard(city, weather) {
+  const div = document.createElement("div");
+  div.className = "card";
+  if (weather) {
+    const desc = weatherCodeMap[weather.weathercode] ?? "알 수 없음";
+    div.innerHTML = `
+      <h2>${city.name}</h2>
+      <div class="temp">${weather.temperature}°C</div>
+      <div class="desc">${desc} · 풍속 ${weather.windspeed}km/h</div>
+    `;
+  } else {
+    div.innerHTML = `<h2>${city.name}</h2><div class="desc">날씨 정보를 불러오지 못했습니다.</div>`;
+  }
+  return div;
+}
+
+async function loadAll() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  for (const city of cities) {
+    const card = renderCard(city, null);
+    card.querySelector(".desc").textContent = "불러오는 중...";
+    grid.appendChild(card);
+  }
+  const cards = grid.children;
+  await Promise.all(cities.map(async (city, i) => {
+    try {
+      const weather = await fetchWeather(city);
+      cards[i].replaceWith(renderCard(city, weather));
+    } catch (e) {
+      cards[i].querySelector(".desc").textContent = "날씨 정보를 불러오지 못했습니다.";
+    }
+  }));
+  document.getElementById("updated").textContent =
+    "마지막 업데이트: " + new Date().toLocaleString("ko-KR");
+}
+
+loadAll();
+</script>
+</body>
+</html>
