@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>비행기 슈팅</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <h1>비행기 슈팅</h1>
+    <p class="desc">화면을 드래그해서 비행기를 움직이세요. 총알은 자동으로 나가요.</p>
+
+    <div class="game-area" id="gameArea">
+      <canvas id="board" width="320" height="480"></canvas>
+
+      <div class="hud">
+        <div class="hud-score">SCORE <span id="scoreValue">0</span></div>
+        <div class="hud-lives" id="livesEl">
+          <span class="heart" data-i="0">❤</span>
+          <span class="heart" data-i="1">❤</span>
+          <span class="heart" data-i="2">❤</span>
+        </div>
+      </div>
+
+      <div class="flash" id="flash"></div>
+
+      <div class="result hidden" id="result">
+        <p class="result-title" id="resultTitle"></p>
+        <p class="result-text" id="resultText"></p>
+        <button id="restartBtn" class="restart-btn">다시하기</button>
+      </div>
+    </div>
+  </main>
+
+<script src="script.js"></script>
+</body>
+</html>
